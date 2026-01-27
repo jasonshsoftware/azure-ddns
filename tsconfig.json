@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", // Targets ES2022 to align with Node.js 22+ features.
+    "module": "es2015", // Ensures compatibility with Node.js 16+ module resolution.
+    "moduleResolution": "Bundler", // Ensures paths resolve correctly in Node.js 16+.
+    "allowSyntheticDefaultImports": true, // Simplifies imports for non-ESM packages.
+
+    "strict": true, // Enables strict mode for better type safety.
+    "noImplicitAny": true, // Flags variables without defined types.
+    "strictNullChecks": true, // Prevents assigning `null` or `undefined` unless specified.
+    "strictFunctionTypes": true, // Ensures function types are checked thoroughly.
+
+    "resolveJsonModule": true, // Allows importing `.json` files directly.
+    "esModuleInterop": true, // Ensures compatibility with CommonJS modules.
+
+    "skipLibCheck": true, // Skips type checking of declaration files for faster builds.
+    "forceConsistentCasingInFileNames": true, // Prevents issues with case-sensitive imports.
+
+    "outDir": "./dist", // Specifies output directory for compiled files.
+    "rootDir": "./src", // Sets the root directory for source files.
+    "sourceMap": true, // Generates `.map` files for better debugging.
+
+    "incremental": true, // Enables incremental compilation for faster rebuilds.
+    "isolatedModules": true // Ensures each file is treated as its own module.
+  },
+  "include": ["src/**/*.ts"], // Includes all `.ts` files in the `/src` folder.
+  "exclude": ["node_modules"] // Excludes dependencies from compilation.
+}
