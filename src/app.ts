@@ -1,0 +1,1 @@
+export default { listen: (port: number, callback?: () => void) => {console.log("bar")} };
