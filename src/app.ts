@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express, { Request, Response } from "express";
-import os from "os";
 import axios from "axios";
 import { ClientSecretCredential } from "@azure/identity";
 import { DnsManagementClient } from "@azure/arm-dns";
@@ -18,7 +17,7 @@ const {
   RECORD_NAME,
   ZONE_NAME,
   TTL = "300",
-  DELAY = "90000",
+  DELAY = "5000", //"90000",
 } = process.env;
 
 if (
@@ -77,19 +76,35 @@ async function syncIp(): Promise<string> {
   if (ip !== cachedIp) {
     cachedIp = ip;
     await updateDns(ip);
-    lastUpdated = new Date().toISOString();
+    lastSync = lastUpdated = new Date().toISOString();
 
     console.log(`DNS updated → ${RECORD_NAME}.${ZONE_NAME} = ${ip}`);
+  } else {
+    lastSync = new Date().toISOString();
   }
-  lastSync = new Date().toISOString();
 
   return ip;
+}
+
+function getStatus() {
+  return {
+    record: `${RECORD_NAME}.${ZONE_NAME}`,
+    ip: cachedIp,
+    lastUpdated,
+    lastSync,
+  };
 }
 
 /* ---------- HTTP API ---------- */
 
 const app = express();
 export default app;
+
+app.post("/sync", async (_req: Request, res: Response) => {
+  await syncIp();
+
+  res.json(getStatus());
+});
 
 /* ---------- Startup ---------- */
 
