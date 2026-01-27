@@ -17,7 +17,7 @@ const {
   RECORD_NAME,
   ZONE_NAME,
   TTL = "300",
-  DELAY = "5000", //"90000",
+  DELAY = "90000",
 } = process.env;
 
 if (
@@ -100,7 +100,11 @@ function getStatus() {
 const app = express();
 export default app;
 
-app.post("/sync", async (_req: Request, res: Response) => {
+app.get("/info", async (_, res: Response) => {
+  res.json(getStatus());
+});
+
+app.post("/sync", async (_, res: Response) => {
   await syncIp();
 
   res.json(getStatus());
