@@ -13,9 +13,9 @@ COPY package.json package-lock.json* ./
 RUN npm install --production
 COPY --from=build /app/dist ./dist
 
-EXPOSE 9000
+EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD wget -qO- http://localhost:9000/healthz || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=10s \
+    CMD wget -qO- http://localhost:8000/healthz || exit 1
 
 CMD ["node", "dist/server.js"]
