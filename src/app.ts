@@ -17,7 +17,7 @@ const {
   RECORD_NAME,
   ZONE_NAME,
   TTL = "300",
-  DELAY = "90000",
+  INTERVAL = "90000",
 } = process.env;
 
 if (
@@ -33,7 +33,7 @@ if (
 }
 
 const ttl = Number(TTL);
-const delay = Number(DELAY);
+const interval = Number(INTERVAL);
 
 /* ---------- Azure ---------- */
 
@@ -49,6 +49,7 @@ const dnsClient = new DnsManagementClient(credential, AZURE_SUBSCRIPTION_ID);
 let cachedIp: string | null = null;
 let lastUpdated: string | null = null;
 let lastSync: string | null = null;
+let lastError: any | null = null;
 
 /* ---------- Functions ---------- */
 
@@ -71,19 +72,25 @@ async function updateDns(ip: string): Promise<void> {
 }
 
 async function syncIp(): Promise<string> {
-  const ip = await getPublicIp();
+  lastError = null;
+  try {
+    const ip = await getPublicIp();
 
-  if (ip !== cachedIp) {
-    cachedIp = ip;
-    await updateDns(ip);
-    lastSync = lastUpdated = new Date().toISOString();
+    if (ip !== cachedIp) {
+      cachedIp = ip;
+      await updateDns(ip);
+      lastSync = lastUpdated = new Date().toISOString();
 
-    console.log(`DNS updated → ${RECORD_NAME}.${ZONE_NAME} = ${ip}`);
-  } else {
-    lastSync = new Date().toISOString();
+      console.log(`DNS updated → ${RECORD_NAME}.${ZONE_NAME} = ${ip}`);
+    } else {
+      lastSync = new Date().toISOString();
+    }
+
+    return ip;
+  } catch (error) {
+    lastError = error;
+    throw error;
   }
-
-  return ip;
 }
 
 function getStatus() {
@@ -99,6 +106,12 @@ function getStatus() {
 
 const app = express();
 export default app;
+
+app.get("/healthz", (_, res: Response) => {
+  if (lastError) throw lastError;
+
+  res.type("text/plain").send("HEALTHY");
+});
 
 app.get("/info", async (_, res: Response) => {
   res.json(getStatus());
@@ -116,4 +129,4 @@ syncIp().catch(console.error);
 
 setInterval(() => {
   syncIp().catch(console.error);
-}, delay);
+}, interval);
